@@ -3,16 +3,27 @@
 #include <glad/glad.h>
 #include "Window.h"
 #include <cassert>
+#include <cstdio>
+#include <memory>
 
 struct App
 {
 	GLFWwindow* window = nullptr;
+    int keysPrev[KEY_COUNT]{};
+    int keysCurr[KEY_COUNT]{};
 } gApp;
 
 void KeyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(gApp.window, GLFW_TRUE);
+    if (action == GLFW_REPEAT) return;
+    gApp.keysCurr[key] = action;
+    
+    // Uncomment to see how key events work!
+    //const char* name = glfwGetKeyName(key, scancode);
+    //if (action == GLFW_PRESS)
+    //    printf("%s is down\n", name);
+    //else if (action == GLFW_RELEASE)
+    //    printf("%s is up\n", name);
 }
 
 void CreateWindow(int width, int height, const char* title)
@@ -38,6 +49,11 @@ void CreateWindow(int width, int height, const char* title)
     glfwSetKeyCallback(gApp.window, KeyboardCallback);
 }
 
+void SetWindowShouldClose(bool close)
+{
+    glfwSetWindowShouldClose(gApp.window, close ? GLFW_TRUE : GLFW_FALSE);
+}
+
 bool WindowShouldClose()
 {
     return glfwWindowShouldClose(gApp.window);
@@ -45,11 +61,35 @@ bool WindowShouldClose()
 
 void Loop()
 {
+    // Last frame escape down
+    // This frame escape up
+    memcpy(gApp.keysPrev, gApp.keysCurr, sizeof(int) * KEY_COUNT);
+
     /* Swap front and back buffers */
     glfwSwapBuffers(gApp.window);
 
     /* Poll for and process events */
     glfwPollEvents();
+
+    //if (IsKeyPressed(KEY_ESCAPE))
+    //    glfwSetWindowShouldClose(gApp.window, GLFW_TRUE);
+}
+
+bool IsKeyDown(int key)
+{
+    return gApp.keysCurr[key] == GLFW_PRESS;
+}
+
+bool IsKeyUp(int key)
+{
+    return gApp.keysCurr[key] == GLFW_RELEASE;
+}
+
+bool IsKeyPressed(int key)
+{
+    return 
+        gApp.keysPrev[key] == GLFW_PRESS &&
+        gApp.keysCurr[key] == GLFW_RELEASE;
 }
 
 void DestroyWindow()

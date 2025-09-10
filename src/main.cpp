@@ -8,6 +8,9 @@ int main()
     /* Loop until the user closes the window */
     while (!WindowShouldClose())
     {
+        if (IsKeyPressed(KEY_ESCAPE))
+            SetWindowShouldClose(true);
+
         // Colors are represented as fractions between 0.0 and 1.0, so convert using a colour-picker tool accordingly!
         float r = 239.0f / 255.0f;
         float g = 136.0f / 255.0f;
