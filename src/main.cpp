@@ -21,6 +21,7 @@ int main()
         glClearColor(r, g, b, a);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        // Called at end of the frame to swap buffers and update input
         Loop();
     }
 
