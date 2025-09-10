@@ -4,8 +4,8 @@
 
 struct vec2
 {
-    float x;
-    float y;
+    float x;    // x is 4 bytes
+    float y;    // y is 4 bytes
 };
 
 struct vec3
@@ -17,8 +17,8 @@ struct vec3
 
 struct Vertex
 {
-    vec2 pos;
-    vec3 col;
+    vec2 pos;   // offset of 0
+    vec3 col;   // offset of 8 (4 bytes for pos.x + 4 bytes for pos.y = 8)
 };
 
 static const Vertex vertices[3] =
@@ -42,10 +42,10 @@ static const char* vertex_shader_text =
 static const char* fragment_shader_text =
 "#version 330\n"
 "in vec3 color;\n"
-"out vec4 fragment;\n"
+"out vec4 fragColor;\n"
 "void main()\n"
 "{\n"
-"    fragment = vec4(color, 1.0);\n"
+"    fragColor = vec4(color, 1.0);\n"
 "}\n";
 
 int main()
@@ -77,12 +77,12 @@ int main()
     GLuint vertex_array;
     glGenVertexArrays(1, &vertex_array);
     glBindVertexArray(vertex_array);
+
     glEnableVertexAttribArray(vpos_location);
-    glVertexAttribPointer(vpos_location, 2, GL_FLOAT, GL_FALSE,
-        sizeof(Vertex), (void*)offsetof(Vertex, pos));
+    glVertexAttribPointer(vpos_location, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, pos));
+
     glEnableVertexAttribArray(vcol_location);
-    glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE,
-        sizeof(Vertex), (void*)offsetof(Vertex, col));
+    glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, col));
 
     /* Loop until the user closes the window */
     while (!WindowShouldClose())
