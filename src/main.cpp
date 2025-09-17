@@ -30,8 +30,8 @@ static const Vertex vertices[3] =
 
 static const char* vertex_shader_text =
 "#version 330\n"
-"in vec3 vCol;\n"
-"in vec2 vPos;\n"
+"layout (location = 0) in vec2 vPos;\n"
+"layout (location = 1) in vec3 vCol;\n"
 "out vec3 color;\n"
 "void main()\n"
 "{\n"
@@ -52,11 +52,6 @@ int main()
 {
     CreateWindow(800, 800, "Graphics 1");
 
-    GLuint vertex_buffer;
-    glGenBuffers(1, &vertex_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
     const GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
     glCompileShader(vertex_shader);
@@ -70,19 +65,22 @@ int main()
     glAttachShader(program, fragment_shader);
     glLinkProgram(program);
 
-    //const GLint mvp_location = glGetUniformLocation(program, "MVP");
-    const GLint vpos_location = glGetAttribLocation(program, "vPos");
-    const GLint vcol_location = glGetAttribLocation(program, "vCol");
+    GLuint vertex_buffer;
+    glGenBuffers(1, &vertex_buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     GLuint vertex_array;
     glGenVertexArrays(1, &vertex_array);
     glBindVertexArray(vertex_array);
 
-    glEnableVertexAttribArray(vpos_location);
-    glVertexAttribPointer(vpos_location, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, pos));
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
 
-    glEnableVertexAttribArray(vcol_location);
-    glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, col));
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, pos));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, col));
+
+    int object_index = 0;
 
     /* Loop until the user closes the window */
     while (!WindowShouldClose())
@@ -100,9 +98,43 @@ int main()
         glClearColor(r, g, b, a);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(program);
-        glBindVertexArray(vertex_array);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        if (IsKeyPressed(KEY_SPACE))
+        {
+            ++object_index %= 5;
+        }
+
+        switch (object_index)
+        {
+        case 0:
+            glUseProgram(program);
+            glBindVertexArray(vertex_array);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+            break;
+
+        case 1:
+            glUseProgram(program);
+            glBindVertexArray(vertex_array);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+            break;
+
+        case 2:
+            glUseProgram(program);
+            glBindVertexArray(vertex_array);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+            break;
+
+        case 3:
+            glUseProgram(program);
+            glBindVertexArray(vertex_array);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+            break;
+
+        case 4:
+            glUseProgram(program);
+            glBindVertexArray(vertex_array);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+            break;
+        }
 
         // Called at end of the frame to swap buffers and update input
         Loop();
