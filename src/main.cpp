@@ -21,11 +21,20 @@ struct Vertex
     vec3 col;   // offset of 8 (4 bytes for pos.x + 4 bytes for pos.y = 8)
 };
 
-static const Vertex vertices[3] =
+// Assignment 1 object 1 -- white triangle (change these vertex colours from red to white)!!!
+static const Vertex vertices_white[3] =
 {
-    { { -0.6f, -0.4f }, { 1.f, 0.f, 0.f } },
-    { {  0.6f, -0.4f }, { 0.f, 1.f, 0.f } },
-    { {   0.f,  0.6f }, { 0.f, 0.f, 1.f } }
+    { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
+    { {  0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
+    { {   0.f,  0.6f }, { 1.0f, 0.0f, 0.0f } }
+};
+  
+// Assignment 1 object 2 -- rainbow triangle (done for you)
+static const Vertex vertices_rainbow[3] =
+{
+    { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
+    { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } },
+    { {   0.f,  0.6f }, { 0.0f, 0.0f, 1.0f } }
 };
 
 static const char* vertex_shader_text =
@@ -65,20 +74,42 @@ int main()
     glAttachShader(program, fragment_shader);
     glLinkProgram(program);
 
-    GLuint vertex_buffer;
-    glGenBuffers(1, &vertex_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    GLuint vertex_buffer_rainbow;
+    glGenBuffers(1, &vertex_buffer_rainbow);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_rainbow);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_rainbow), vertices_rainbow, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
+    // Can only have 1 vertex buffer bound at a time, so must unbind in order to prevent overwriting it
 
-    GLuint vertex_array;
-    glGenVertexArrays(1, &vertex_array);
-    glBindVertexArray(vertex_array);
+    GLuint vertex_buffer_white;
+    glGenBuffers(1, &vertex_buffer_white);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_white);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_white), vertices_white, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
+
+    GLuint vertex_array_rainbow;
+    glGenVertexArrays(1, &vertex_array_rainbow);
+    glBindVertexArray(vertex_array_rainbow);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_array_rainbow);
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
-
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, pos));
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, col));
+
+    glBindVertexArray(GL_NONE);
+
+    GLuint vertex_array_white;
+    glGenVertexArrays(1, &vertex_array_white);
+    glBindVertexArray(vertex_array_white);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_white);
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, pos));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, col));
+
+    glBindVertexArray(GL_NONE);
 
     int object_index = 0;
 
@@ -107,31 +138,31 @@ int main()
         {
         case 0:
             glUseProgram(program);
-            glBindVertexArray(vertex_array);
+            glBindVertexArray(vertex_array_white);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
 
         case 1:
             glUseProgram(program);
-            glBindVertexArray(vertex_array);
+            glBindVertexArray(vertex_array_rainbow);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
 
         case 2:
             glUseProgram(program);
-            glBindVertexArray(vertex_array);
+            glBindVertexArray(vertex_array_rainbow);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
 
         case 3:
             glUseProgram(program);
-            glBindVertexArray(vertex_array);
+            glBindVertexArray(vertex_array_rainbow);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
 
         case 4:
             glUseProgram(program);
-            glBindVertexArray(vertex_array);
+            glBindVertexArray(vertex_array_rainbow);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
         }
