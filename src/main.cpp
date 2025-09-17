@@ -84,6 +84,8 @@ int main()
 
     int object_index = 0;
 
+    GLint u_color = glGetUniformLocation(a1_tri_shader, "u_color");
+
     /* Loop until the user closes the window */
     while (!WindowShouldClose())
     {
@@ -109,30 +111,35 @@ int main()
         {
         case 0:
             glUseProgram(a1_tri_shader);
+            glUniform3f(u_color, 1.0, 1.0f, 1.0f);
             glBindVertexArray(vertex_array_white);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
 
         case 1:
             glUseProgram(a1_tri_shader);
+            glUniform3f(u_color, 0.8, 0.8f, 0.8f);
             glBindVertexArray(vertex_array_rainbow);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
 
         case 2:
             glUseProgram(a1_tri_shader);
+            glUniform3f(u_color, 0.6, 0.6f, 0.6f);
             glBindVertexArray(vertex_array_rainbow);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
 
         case 3:
             glUseProgram(a1_tri_shader);
+            glUniform3f(u_color, 0.4, 0.4f, 0.4f);
             glBindVertexArray(vertex_array_rainbow);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
 
         case 4:
             glUseProgram(a1_tri_shader);
+            glUniform3f(u_color, 0.2, 0.2f, 0.2f);
             glBindVertexArray(vertex_array_rainbow);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
@@ -141,6 +148,14 @@ int main()
         // Called at end of the frame to swap buffers and update input
         Loop();
     }
+
+    glDeleteVertexArrays(1, &vertex_array_rainbow);
+    glDeleteVertexArrays(1, &vertex_array_white);
+    glDeleteBuffers(1, &vertex_buffer_rainbow);
+    glDeleteBuffers(1, &vertex_buffer_white);
+    glDeleteProgram(a1_tri_shader);
+    glDeleteShader(a1_tri_frag);
+    glDeleteShader(a1_tri_vert);
 
     DestroyWindow();
     return 0;
