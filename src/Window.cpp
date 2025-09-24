@@ -111,6 +111,11 @@ bool WindowShouldClose()
     return glfwWindowShouldClose(gApp.window);
 }
 
+float Time()
+{
+    return glfwGetTime();
+}
+
 void Loop()
 {
     // Last frame escape down

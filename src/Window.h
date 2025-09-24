@@ -6,6 +6,7 @@ void DestroyWindow();
 void SetWindowShouldClose(bool close);
 bool WindowShouldClose();
 
+float Time();
 void Loop();
 
 bool IsKeyDown(int key);		// If a key is heald

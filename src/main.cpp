@@ -2,6 +2,9 @@
 #include "Shader.h"
 #include "raymath.h"
 #include <cstddef>
+#include <cstdlib>
+#include <cstdio>
+#include <ctime>
 
 struct Vertex
 {
@@ -95,6 +98,12 @@ int main()
     int object_index = 0;
 
     GLint u_color = glGetUniformLocation(a1_tri_shader, "u_color");
+    GLint u_world = glGetUniformLocation(a1_tri_shader, "u_world");
+
+    Matrix world = world = MatrixIdentity();
+
+    // Generally you want to Scale * Rotate * Translate (order matters)!!!
+    world = MatrixRotateZ(30.0f * DEG2RAD) * MatrixTranslate(0.5f, 0.0f, 0.0f);
 
     /* Loop until the user closes the window */
     while (!WindowShouldClose())
@@ -107,6 +116,9 @@ int main()
         float g = 136.0f / 255.0f;
         float b = 190.0f / 255.0f;
         float a = 1.0f;
+
+        // Time in seconds since GLFW was initialized (use this with functions like sinf and cosf for repeating animations)
+        float tt = Time();
 
         /* Render here */
         glClearColor(r, g, b, a);
@@ -122,6 +134,10 @@ int main()
         case 0:
             glUseProgram(a1_tri_shader);
             glUniform3f(u_color, 1.0f, 1.0f, 1.0f);
+
+            // Must use MatrixToFloat to send mat4 since raylib Matrix memory is in a different layout than glsl mat4
+            glUniformMatrix4fv(u_world, 1, GL_FALSE, MatrixToFloat(world));
+
             glBindVertexArray(vertex_array_white);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
@@ -129,6 +145,7 @@ int main()
         case 1:
             glUseProgram(a1_tri_shader);
             glUniform3f(u_color, 0.8, 0.8f, 0.8f);
+            glUniformMatrix4fv(u_world, 1, GL_FALSE, MatrixToFloat(world));
             glBindVertexArray(vertex_array_rainbow);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
@@ -136,6 +153,7 @@ int main()
         case 2:
             glUseProgram(a1_tri_shader);
             glUniform3f(u_color, 0.6, 0.6f, 0.6f);
+            glUniformMatrix4fv(u_world, 1, GL_FALSE, MatrixToFloat(world));
             glBindVertexArray(vertex_array_rainbow);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
@@ -143,6 +161,7 @@ int main()
         case 3:
             glUseProgram(a1_tri_shader);
             glUniform3f(u_color, 0.4, 0.4f, 0.4f);
+            glUniformMatrix4fv(u_world, 1, GL_FALSE, MatrixToFloat(world));
             glBindVertexArray(vertex_array_rainbow);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
@@ -150,6 +169,7 @@ int main()
         case 4:
             glUseProgram(a1_tri_shader);
             glUniform3f(u_color, 0.5, 0.5f, 0.5f);
+            glUniformMatrix4fv(u_world, 1, GL_FALSE, MatrixToFloat(world));
             glBindVertexArray(vertex_array_rainbow);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
