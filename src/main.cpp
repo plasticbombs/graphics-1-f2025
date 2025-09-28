@@ -15,9 +15,9 @@ struct Vertex
 // Assignment 1 object 1 -- white triangle (change these vertex colours from red to white)!!!
 static const Vertex vertices_white[3] =
 {
-    { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
-    { {  0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
-    { {   0.f,  0.6f }, { 1.0f, 0.0f, 0.0f } }
+    { { -0.6f, -0.4f }, { 1.0f, 1.0f, 1.0f } },
+    { {  0.6f, -0.4f }, { 1.0f, 1.0f, 1.0f } },
+    { {   0.f,  0.6f }, { 1.0f, 1.0f, 1.0f } }
 };
 
 // Assignment 1 object 2 -- rainbow triangle (done for you)
@@ -103,7 +103,7 @@ int main()
     Matrix world = world = MatrixIdentity();
 
     // Generally you want to Scale * Rotate * Translate (order matters)!!!
-    world = MatrixRotateZ(30.0f * DEG2RAD) * MatrixTranslate(0.5f, 0.0f, 0.0f);
+    //world = MatrixRotateZ(30.0f * DEG2RAD) * MatrixTranslate(0.5f, 0.0f, 0.0f);
 
     /* Loop until the user closes the window */
     while (!WindowShouldClose())
@@ -132,6 +132,7 @@ int main()
         switch (object_index)
         {
         case 0:
+            world = MatrixIdentity();
             glUseProgram(a1_tri_shader);
             glUniform3f(u_color, 1.0f, 1.0f, 1.0f);
 
@@ -152,25 +153,29 @@ int main()
 
         case 2:
             glUseProgram(a1_tri_shader);
-            glUniform3f(u_color, 0.6, 0.6f, 0.6f);
+            glUniform3f(u_color, Clamp(sinf(tt*PI), 0.0f, 1.0f), 0.f, 0.f);
+            printf("%f\n", Clamp(sinf(tt * PI), 0.0f, 1.0f));
             glUniformMatrix4fv(u_world, 1, GL_FALSE, MatrixToFloat(world));
-            glBindVertexArray(vertex_array_rainbow);
+            glBindVertexArray(vertex_array_white);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
 
         case 3:
+            world = MatrixTranslate(Clamp(sinf(tt), -1.0f, 1.0f), 0.f, 0.f);
             glUseProgram(a1_tri_shader);
-            glUniform3f(u_color, 0.4, 0.4f, 0.4f);
+            glUniform3f(u_color, 0.8f, 0.3f, 0.8f);
             glUniformMatrix4fv(u_world, 1, GL_FALSE, MatrixToFloat(world));
-            glBindVertexArray(vertex_array_rainbow);
+            glBindVertexArray(vertex_array_white);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
 
         case 4:
+            world = MatrixIdentity();
+            world = MatrixRotateZ(sinf(-90 * DEG2RAD) * tt);
             glUseProgram(a1_tri_shader);
             glUniform3f(u_color, 0.5, 0.5f, 0.5f);
             glUniformMatrix4fv(u_world, 1, GL_FALSE, MatrixToFloat(world));
-            glBindVertexArray(vertex_array_rainbow);
+            glBindVertexArray(vertex_array_white);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
         }
