@@ -15,9 +15,9 @@ struct Vertex
 // Assignment 1 object 1 -- white triangle (change these vertex colours from red to white)!!!
 static const Vertex vertices_white[3] =
 {
-    { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
-    { {  0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
-    { {   0.f,  0.6f }, { 1.0f, 0.0f, 0.0f } }
+    { { -0.6f, -0.4f }, { 1.0f, 1.0f, 1.0f } },
+    { {  0.6f, -0.4f }, { 1.0f, 1.0f, 1.0f } },
+    { {   0.f,  0.6f }, { 1.0f, 1.0f, 1.0f } }
 };
 
 // Assignment 1 object 2 -- rainbow triangle (done for you)
@@ -111,10 +111,10 @@ int main()
     Matrix view = MatrixLookAt({ 0.0f, 0.0f, 10.0f }, { 0.0f, 0.0f, 0.0f }, Vector3UnitY);
 
     // Perspective = 3D projection (closer objects = bigger, farther objects = smaller)
-    //Matrix proj = MatrixPerspective(75.0f * DEG2RAD, aspect, near, far);
+    Matrix proj = MatrixPerspective(75.0f * DEG2RAD, aspect, near, far);
 
     // Orthographic = 2D projection (objects are the same size regardless of distance from camera)
-    Matrix proj = MatrixOrtho(-10.0f, 10.0f, -10.0f, 10.0f, near, far);
+    //Matrix proj = MatrixOrtho(-10.0f, 10.0f, -10.0f, 10.0f, near, far);
 
     Matrix mvp = world * view * proj;
 
@@ -138,7 +138,7 @@ int main()
 
         /* Render here */
         glClearColor(r, g, b, a);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if (IsKeyPressed(KEY_SPACE))
         {
@@ -148,13 +148,26 @@ int main()
         switch (object_index)
         {
         case 0:
+            // Both triangles use the same vertex data and the same shader
             glUseProgram(a1_tri_shader);
-            glUniform3f(u_color, 1.0f, 1.0f, 1.0f);
-
-            // Must use MatrixToFloat to send mat4 since raylib Matrix memory is in a different layout than glsl mat4
-            glUniformMatrix4fv(u_mvp, 1, GL_FALSE, MatrixToFloat(mvp));
-
             glBindVertexArray(vertex_array_white);
+
+            // If we disable depth-testing, whichever triangle we draw last will be visible
+            // (Meaning the green triangle will render "on top of" the red triangle despite being behind the red triangle)
+            //glDisable(GL_DEPTH_TEST);
+
+            // Red triangle (closer to the camera)
+            world = MatrixTranslate(0.0f, 0.0f, 9.0f);
+            mvp = world * view * proj;
+            glUniform3f(u_color, 1.0f, 0.0f, 0.0f);
+            glUniformMatrix4fv(u_mvp, 1, GL_FALSE, MatrixToFloat(mvp));
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+
+            // Green triangle (further from the camera)
+            world = MatrixTranslate(0.0f, 0.0f, 5.0f);
+            mvp = world * view * proj;
+            glUniform3f(u_color, 0.0f, 1.0f, 0.0f);
+            glUniformMatrix4fv(u_mvp, 1, GL_FALSE, MatrixToFloat(mvp));
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
 

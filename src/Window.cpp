@@ -99,6 +99,9 @@ void CreateWindow(int width, int height, const char* title)
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(DebugCallback, nullptr);
 #endif
+
+    // Initialize graphics pipeline state
+    glEnable(GL_DEPTH_TEST); // Enable depth-testing (occlude overlapping objects)
 }
 
 void SetWindowShouldClose(bool close)
