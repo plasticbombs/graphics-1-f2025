@@ -3,6 +3,9 @@
 void CreateWindow(int width, int height, const char* title);
 void DestroyWindow();
 
+int WindowWidth();
+int WindowHeight();
+
 void SetWindowShouldClose(bool close);
 bool WindowShouldClose();
 

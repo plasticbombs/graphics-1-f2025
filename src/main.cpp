@@ -98,12 +98,28 @@ int main()
     int object_index = 0;
 
     GLint u_color = glGetUniformLocation(a1_tri_shader, "u_color");
-    GLint u_world = glGetUniformLocation(a1_tri_shader, "u_world");
+    //GLint u_world = glGetUniformLocation(a1_tri_shader, "u_world");
+    GLint u_mvp = glGetUniformLocation(a1_tri_shader, "u_mvp");
 
-    Matrix world = world = MatrixIdentity();
+    // Note that we must cast to float to prevent truncation due to integer division
+    float aspect = WindowWidth() / (float)WindowHeight();
+    float near = 0.01f;
+    float far = 100.0f;
+    
+    // Scale our triangle by a factor of 5, then translate it 5 units forward/"out of the screen" (OpenGL is an RHS so -z = "into the screen")
+    Matrix world = MatrixScale(5.0f, 5.0f, 1.0f) * MatrixRotateZ(0.0f * DEG2RAD) *  MatrixTranslate(0.0, 0.0f, 5.0f);
+    Matrix view = MatrixLookAt({ 0.0f, 0.0f, 10.0f }, { 0.0f, 0.0f, 0.0f }, Vector3UnitY);
+
+    // Perspective = 3D projection (closer objects = bigger, farther objects = smaller)
+    //Matrix proj = MatrixPerspective(75.0f * DEG2RAD, aspect, near, far);
+
+    // Orthographic = 2D projection (objects are the same size regardless of distance from camera)
+    Matrix proj = MatrixOrtho(-10.0f, 10.0f, -10.0f, 10.0f, near, far);
+
+    Matrix mvp = world * view * proj;
 
     // Generally you want to Scale * Rotate * Translate (order matters)!!!
-    world = MatrixRotateZ(30.0f * DEG2RAD) * MatrixTranslate(0.5f, 0.0f, 0.0f);
+    //world = MatrixRotateZ(30.0f * DEG2RAD) * MatrixTranslate(0.5f, 0.0f, 0.0f);
 
     /* Loop until the user closes the window */
     while (!WindowShouldClose())
@@ -136,7 +152,7 @@ int main()
             glUniform3f(u_color, 1.0f, 1.0f, 1.0f);
 
             // Must use MatrixToFloat to send mat4 since raylib Matrix memory is in a different layout than glsl mat4
-            glUniformMatrix4fv(u_world, 1, GL_FALSE, MatrixToFloat(world));
+            glUniformMatrix4fv(u_mvp, 1, GL_FALSE, MatrixToFloat(mvp));
 
             glBindVertexArray(vertex_array_white);
             glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -145,7 +161,7 @@ int main()
         case 1:
             glUseProgram(a1_tri_shader);
             glUniform3f(u_color, 0.8, 0.8f, 0.8f);
-            glUniformMatrix4fv(u_world, 1, GL_FALSE, MatrixToFloat(world));
+            glUniformMatrix4fv(u_mvp, 1, GL_FALSE, MatrixToFloat(mvp));
             glBindVertexArray(vertex_array_rainbow);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
@@ -153,7 +169,7 @@ int main()
         case 2:
             glUseProgram(a1_tri_shader);
             glUniform3f(u_color, 0.6, 0.6f, 0.6f);
-            glUniformMatrix4fv(u_world, 1, GL_FALSE, MatrixToFloat(world));
+            glUniformMatrix4fv(u_mvp, 1, GL_FALSE, MatrixToFloat(mvp));
             glBindVertexArray(vertex_array_rainbow);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
@@ -161,7 +177,7 @@ int main()
         case 3:
             glUseProgram(a1_tri_shader);
             glUniform3f(u_color, 0.4, 0.4f, 0.4f);
-            glUniformMatrix4fv(u_world, 1, GL_FALSE, MatrixToFloat(world));
+            glUniformMatrix4fv(u_mvp, 1, GL_FALSE, MatrixToFloat(mvp));
             glBindVertexArray(vertex_array_rainbow);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
@@ -169,7 +185,7 @@ int main()
         case 4:
             glUseProgram(a1_tri_shader);
             glUniform3f(u_color, 0.5, 0.5f, 0.5f);
-            glUniformMatrix4fv(u_world, 1, GL_FALSE, MatrixToFloat(world));
+            glUniformMatrix4fv(u_mvp, 1, GL_FALSE, MatrixToFloat(mvp));
             glBindVertexArray(vertex_array_rainbow);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
