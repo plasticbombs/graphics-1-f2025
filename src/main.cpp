@@ -1,6 +1,7 @@
 #include "Window.h"
 #include "Shader.h"
 #include "raymath.h"
+#include <imgui/imgui.h>
 #include <cstddef>
 #include <cstdlib>
 #include <cstdio>
@@ -203,6 +204,11 @@ int main()
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
         }
+
+        // Write our widget code within begin/end gui loop!
+        BeginGui();
+            ImGui::ShowDemoWindow(nullptr);
+        EndGui();
 
         // Called at end of the frame to swap buffers and update input
         Loop();

@@ -12,6 +12,9 @@ bool WindowShouldClose();
 float Time();
 void Loop();
 
+void BeginGui();
+void EndGui();
+
 bool IsKeyDown(int key);		// If a key is heald
 bool IsKeyUp(int key);			// If a key is released
 bool IsKeyPressed(int key);		// If a key is pressed (down then up)

@@ -1,6 +1,11 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
+
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
+
 #include "Window.h"
 #include <cassert>
 #include <iostream>
@@ -100,6 +105,16 @@ void CreateWindow(int width, int height, const char* title)
     glDebugMessageCallback(DebugCallback, nullptr);
 #endif
 
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(gApp.window, true);
+    ImGui_ImplOpenGL3_Init("#version 430");
+
     // Initialize graphics pipeline state
     glEnable(GL_DEPTH_TEST); // Enable depth-testing (occlude overlapping objects)
 }
@@ -132,6 +147,19 @@ void Loop()
     glfwPollEvents();
 }
 
+void BeginGui()
+{
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+}
+
+void EndGui()
+{
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
 bool IsKeyDown(int key)
 {
     return gApp.keysCurr[key] == GLFW_PRESS;
@@ -151,6 +179,9 @@ bool IsKeyPressed(int key)
 
 void DestroyWindow()
 {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
     glfwTerminate();
 }
 
