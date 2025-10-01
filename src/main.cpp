@@ -43,6 +43,12 @@ static const Vector3 vertex_colors[3] =
     { 0.0f, 0.0f, 1.0f }
 };
 
+enum ProjectionType : int
+{
+    PROJ_ORTHOGRAPHIC,
+    PROJ_PERSPECTIVE
+};
+
 int main()
 {
     CreateWindow(800, 800, "Graphics 1");
@@ -96,31 +102,27 @@ int main()
 
     glBindVertexArray(GL_NONE);
 
-    int object_index = 0;
-
     GLint u_color = glGetUniformLocation(a1_tri_shader, "u_color");
     //GLint u_world = glGetUniformLocation(a1_tri_shader, "u_world");
     GLint u_mvp = glGetUniformLocation(a1_tri_shader, "u_mvp");
 
     // Note that we must cast to float to prevent truncation due to integer division
     float aspect = WindowWidth() / (float)WindowHeight();
+    float fov = 75.0f * DEG2RAD;
+
+    float left = -1.0f;
+    float right = 1.0f;
+    float bottom = -1.0f;
+    float top = 1.0f;
+
     float near = 0.01f;
     float far = 100.0f;
-    
-    // Scale our triangle by a factor of 5, then translate it 5 units forward/"out of the screen" (OpenGL is an RHS so -z = "into the screen")
-    Matrix world = MatrixScale(5.0f, 5.0f, 1.0f) * MatrixRotateZ(0.0f * DEG2RAD) *  MatrixTranslate(0.0, 0.0f, 5.0f);
-    Matrix view = MatrixLookAt({ 0.0f, 0.0f, 10.0f }, { 0.0f, 0.0f, 0.0f }, Vector3UnitY);
+    int proj_type = PROJ_PERSPECTIVE;
 
-    // Perspective = 3D projection (closer objects = bigger, farther objects = smaller)
-    Matrix proj = MatrixPerspective(75.0f * DEG2RAD, aspect, near, far);
-
-    // Orthographic = 2D projection (objects are the same size regardless of distance from camera)
-    //Matrix proj = MatrixOrtho(-10.0f, 10.0f, -10.0f, 10.0f, near, far);
-
-    Matrix mvp = world * view * proj;
-
-    // Generally you want to Scale * Rotate * Translate (order matters)!!!
-    //world = MatrixRotateZ(30.0f * DEG2RAD) * MatrixTranslate(0.5f, 0.0f, 0.0f);
+    bool obj_translate = false;
+    bool obj_rotate = false;
+    bool obj_scale = false;
+    int object_index = 1;
 
     /* Loop until the user closes the window */
     while (!WindowShouldClose())
@@ -137,6 +139,28 @@ int main()
         // Time in seconds since GLFW was initialized (use this with functions like sinf and cosf for repeating animations)
         float tt = Time();
 
+        Matrix view = MatrixLookAt({ 0.0f, 0.0f, 10.0f }, { 0.0f, 0.0f, 0.0f }, Vector3UnitY);
+
+        Matrix world = MatrixIdentity();
+        if (obj_scale)
+            world = world * MatrixScale(cosf(tt) * 0.4f + 0.5f, sinf(tt) * 0.4f + 0.5f, 1.0f);
+        if (obj_rotate)
+            world = world * MatrixRotateZ(tt * 100.0f * DEG2RAD);
+        if (obj_translate)
+            world = world * MatrixTranslate(cosf(tt), 0.0f, 0.0f);
+        
+        Matrix proj = MatrixIdentity();
+        switch (proj_type)
+        {
+        case PROJ_ORTHOGRAPHIC:
+            proj = MatrixOrtho(left, right, bottom, top, near, far);
+            break;
+
+        case PROJ_PERSPECTIVE:
+            proj = MatrixPerspective(fov, aspect, near, far);
+            break;
+        }
+
         /* Render here */
         glClearColor(r, g, b, a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -146,6 +170,7 @@ int main()
             ++object_index %= 5;
         }
 
+        Matrix mvp = world * view * proj;
         switch (object_index)
         {
         case 0:
@@ -173,41 +198,69 @@ int main()
             break;
 
         case 1:
+            // 1) Bind static resources such as shader (behaviour) and vertex array object (data)
             glUseProgram(a1_tri_shader);
-            glUniform3f(u_color, 0.8, 0.8f, 0.8f);
+            glBindVertexArray(vertex_array_white);
+
+            // 2) Bind dynamic resources such as uniforms
+            glUniform3f(u_color, 1.0f, 1.0f, 1.0f);
             glUniformMatrix4fv(u_mvp, 1, GL_FALSE, MatrixToFloat(mvp));
-            glBindVertexArray(vertex_array_rainbow);
+
+            // 3) Tell GPU to render (draw call)
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
 
         case 2:
             glUseProgram(a1_tri_shader);
-            glUniform3f(u_color, 0.6, 0.6f, 0.6f);
+            glBindVertexArray(vertex_array_white);
+
+            glUniform3f(u_color, 1.0f, 1.0f, 1.0f);
             glUniformMatrix4fv(u_mvp, 1, GL_FALSE, MatrixToFloat(mvp));
-            glBindVertexArray(vertex_array_rainbow);
+
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
 
         case 3:
             glUseProgram(a1_tri_shader);
-            glUniform3f(u_color, 0.4, 0.4f, 0.4f);
+            glBindVertexArray(vertex_array_white);
+
+            glUniform3f(u_color, 1.0f, 1.0f, 1.0f);
             glUniformMatrix4fv(u_mvp, 1, GL_FALSE, MatrixToFloat(mvp));
-            glBindVertexArray(vertex_array_rainbow);
+
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
 
         case 4:
             glUseProgram(a1_tri_shader);
+            glBindVertexArray(vertex_array_white);
+
             glUniform3f(u_color, 0.5, 0.5f, 0.5f);
             glUniformMatrix4fv(u_mvp, 1, GL_FALSE, MatrixToFloat(mvp));
-            glBindVertexArray(vertex_array_rainbow);
+
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
         }
 
         // Write our widget code within begin/end gui loop!
         BeginGui();
-            ImGui::ShowDemoWindow(nullptr);
+        ImGui::RadioButton("Orthographic", &proj_type, PROJ_ORTHOGRAPHIC); ImGui::SameLine();
+        ImGui::RadioButton("Perspective", &proj_type, PROJ_PERSPECTIVE);
+
+        ImGui::Checkbox("Translate", &obj_translate);
+        ImGui::Checkbox("Rotate", &obj_rotate);
+        ImGui::Checkbox("Scale", &obj_scale);
+
+        ImGui::SliderFloat("Left", &left, -10.0f, 0.0f);
+        ImGui::SliderFloat("Right", &right, 0.0f, 10.0f);
+        ImGui::SliderFloat("Bottom", &bottom, -10.0f, 0.0f);
+        ImGui::SliderFloat("Top", &top, 0.0f, 10.0f);
+
+        ImGui::SliderAngle("FoV", &fov, 5.0f, 175.0f);
+        ImGui::SliderFloat("Near", &near, 0.001f, 1.0f);
+        ImGui::SliderFloat("Far", &far, 1.0f, 1000.0f);
+
+        // Extra practice: add additional widgets such sliders for camera position & camera direction!
+        //ImGui::ShowDemoWindow(nullptr);
         EndGui();
 
         // Called at end of the frame to swap buffers and update input
