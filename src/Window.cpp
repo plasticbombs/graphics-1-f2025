@@ -107,9 +107,15 @@ void CreateWindow(int width, int height, const char* title)
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    
+    //Note: GLFW joystick initialization may be incredibly *slow* if driver software like Razor Synapse *isn't* running
+    // Initialize dinput so imgui call doesn't hang on this mid-frame if we want gamepad support
+    if (io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad)
+        glfwSetJoystickCallback(nullptr);
     
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(g_app.window, true);
