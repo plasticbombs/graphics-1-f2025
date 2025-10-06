@@ -7,14 +7,44 @@
 #include <cstdio>
 #include <ctime>
 
-static const Vector2 line_vertex_positions[2]
+// 4 lines in 1 square -- each line has 2 vertices, therefore 8 array elements because 4 lines * 2 vertices per line = 8
+// Hint: if 1 square is 8 vertices, and Assignment 2 requires you to render 8 squares, then 8 squares * 8 vertices per square = 64 vertices;
+// (Consider reserving 64 vertices worth of space if you'd like to fit all your positions in a single vertex array)
+
+static const int line_vertex_count = 8;
+static const Vector2 line_vertex_positions[line_vertex_count]
 {
-    { -0.5f, -0.5f },   // bottom-left
-    {  0.5f,  0.5f }    // top-right
+    { -1.0f,  -1.0f },   // bottom-left
+    {  1.0f,  -1.0f },   // bottom-right
+
+    {  1.0f, -1.0f },   // bottom-right
+    {  1.0f,  1.0f },   // top-right
+
+    {   1.0f,  1.0f },   // top-right
+    {  -1.0f,  1.0f },   // top-left
+
+    { -1.0f,   1.0f },   // top-left
+    { -1.0f,  -1.0f }    // bottom-left
 };
 
 int main()
 {
+    // How to form the vertices for the 2nd square:
+    Vector2 line_vertex_positions2[8];
+
+    line_vertex_positions2[0] = Vector2Lerp(line_vertex_positions[0], line_vertex_positions[1], 0.5f);
+    line_vertex_positions2[1] = Vector2Lerp(line_vertex_positions[2], line_vertex_positions[3], 0.5f);
+
+    line_vertex_positions2[2] = Vector2Lerp(line_vertex_positions[2], line_vertex_positions[3], 0.5f);
+    line_vertex_positions2[3] = Vector2Lerp(line_vertex_positions[4], line_vertex_positions[5], 0.5f);
+
+    line_vertex_positions2[4] = Vector2Lerp(line_vertex_positions[4], line_vertex_positions[5], 0.5f);
+    line_vertex_positions2[5] = Vector2Lerp(line_vertex_positions[6], line_vertex_positions[7], 0.5f);
+    
+    line_vertex_positions2[6] = Vector2Lerp(line_vertex_positions[6], line_vertex_positions[7], 0.5f);
+    line_vertex_positions2[7] = Vector2Lerp(line_vertex_positions[0], line_vertex_positions[1], 0.5f);
+    // (For full marks, you need to automate this with loops or recursion for 8 iterations [meaning 8 squares])
+
     CreateWindow(800, 800, "Graphics 1");
     
     // Hint: The a1_triangle shaders handle vertex position AND vertex colour.
@@ -27,6 +57,9 @@ int main()
     glGenBuffers(1, &vbo_line_positions);
     glBindBuffer(GL_ARRAY_BUFFER, vbo_line_positions);
     glBufferData(GL_ARRAY_BUFFER, sizeof(line_vertex_positions), line_vertex_positions, GL_STATIC_DRAW);
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(line_vertex_positions2), line_vertex_positions2, GL_STATIC_DRAW);
+    // Comment/uncomment to see 1st square vs 2nd square.
+    // Your job is to automate the generation of squares so all 8 squares are rendered at once!
 
     GLuint vao_line;
     glGenVertexArrays(1, &vao_line);
@@ -42,7 +75,6 @@ int main()
     GLint u_color = glGetUniformLocation(a2_lines_shader, "u_color");
     GLint u_mvp = glGetUniformLocation(a2_lines_shader, "u_mvp");
 
-    /* Loop until the user closes the window */
     while (!WindowShouldClose())
     {
         if (IsKeyPressed(KEY_ESCAPE))
@@ -59,10 +91,11 @@ int main()
 
         glUseProgram(a2_lines_shader);
         glBindVertexArray(vao_line);
+        glLineWidth(5.0f);
 
         glUniformMatrix4fv(u_mvp, 1, GL_FALSE, MatrixToFloat(mvp));
         glUniform3f(u_color, 1.0f, 0.0f, 0.0f);
-        glDrawArrays(GL_LINES, 0, 2);
+        glDrawArrays(GL_LINES, 0, line_vertex_count);
 
         BeginGui();
         //ImGui::ShowDemoWindow(nullptr);
