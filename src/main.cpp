@@ -1,3 +1,4 @@
+//Please work :pray:
 #include "Window.h"
 #include "Shader.h"
 #include "raymath.h"
@@ -6,25 +7,27 @@
 #include <cstdlib>
 #include <cstdio>
 #include <ctime>
+#include <iostream>
+using namespace std;
 
 // 4 lines in 1 square -- each line has 2 vertices, therefore 8 array elements because 4 lines * 2 vertices per line = 8
 // Hint: if 1 square is 8 vertices, and Assignment 2 requires you to render 8 squares, then 8 squares * 8 vertices per square = 64 vertices;
 // (Consider reserving 64 vertices worth of space if you'd like to fit all your positions in a single vertex array)
 
-static const int line_vertex_count = 8;
-static const Vector2 line_vertex_positions[line_vertex_count]
+static const int line_vertex_count = 80;
+Vector2 line_vertex_positions[line_vertex_count]
 {
-    { -1.0f,  -1.0f },   // bottom-left
-    {  1.0f,  -1.0f },   // bottom-right
+    { -0.99f,  -0.99f },   // bottom-left
+    {  0.99f,  -0.99f },   // bottom-right
 
-    {  1.0f, -1.0f },   // bottom-right
-    {  1.0f,  1.0f },   // top-right
+    {  0.99f, -0.99f },   // bottom-right
+    {  0.99f,  0.99f },   // top-right
 
-    {   1.0f,  1.0f },   // top-right
-    {  -1.0f,  1.0f },   // top-left
+    {   0.99f,  0.99f },   // top-right
+    {  -0.99f,  0.99f },   // top-left
 
-    { -1.0f,   1.0f },   // top-left
-    { -1.0f,  -1.0f }    // bottom-left
+    { -0.99f,   0.99f },   // top-left
+    { -0.99f,  -0.99f }    // bottom-left
 };
 
 int main()
@@ -44,6 +47,71 @@ int main()
     line_vertex_positions2[6] = Vector2Lerp(line_vertex_positions[6], line_vertex_positions[7], 0.5f);
     line_vertex_positions2[7] = Vector2Lerp(line_vertex_positions[0], line_vertex_positions[1], 0.5f);
     // (For full marks, you need to automate this with loops or recursion for 8 iterations [meaning 8 squares])
+
+    Vector2 previousLoop[8];
+
+    int iterator = 1; //Iterator to check if the loop is on it's second iteration
+    int currentLoop = 0;
+    int maxLoops = 10;
+    Vector2 savedPosition = {};
+    Vector2 startPosition = {};
+    int loopPosition = 0; //Acttual loop position
+    int prevPosition = 0;
+
+    int actual = 2;
+
+    while (currentLoop < maxLoops) //Behold, the grand while loop housing two for loops
+    {
+        //Run a for loop to save the current square
+        for (int saveIterator = 0; saveIterator < 8; saveIterator++)
+        {
+            previousLoop[saveIterator] = line_vertex_positions[loopPosition];
+            loopPosition++;
+        }
+
+        prevPosition = loopPosition; //Save the position of the start
+
+        //Continue from loop position to create the next square
+        for (int prevIterator = 0; prevIterator < 8; prevIterator++)
+        {
+            //If the loop is at the beginning, create the vertices and then save it as the starting point
+            if (prevIterator == 0)
+            {
+                line_vertex_positions[loopPosition] = Vector2Lerp(previousLoop[prevIterator], previousLoop[prevIterator + 1], 0.5);
+                startPosition = line_vertex_positions[loopPosition];
+            }
+            //If the loop is a multiple of 2 and the loop is not at its end, create the vertices and then save it for the next iteration
+            else if (iterator == 2 && prevIterator != 7)
+            {
+                line_vertex_positions[loopPosition] = Vector2Lerp(previousLoop[actual], previousLoop[actual + 1], 0.5);
+                savedPosition = line_vertex_positions[loopPosition];
+                iterator = 0;
+                actual += 2;
+            }
+            //If the loop is at its end, create a vertices to the starting point
+            else if (prevIterator == 7)
+            {
+                line_vertex_positions[loopPosition] = startPosition;
+                iterator = 0;
+            }
+            //If all else clears, create a vertices from the saved position
+            else
+            {
+                line_vertex_positions[loopPosition] = savedPosition;
+            }
+            
+            loopPosition++;
+            iterator++;
+        }
+        
+        loopPosition = prevPosition; //Go back to the previous position to copy the newly created square
+        actual = 2;
+        currentLoop++;
+    }
+    for (int i = 0; i < line_vertex_count; i++)
+    {
+        cout << line_vertex_positions[i].x << "," << line_vertex_positions[i].y << endl;
+    }
 
     CreateWindow(800, 800, "Graphics 1");
     
@@ -77,6 +145,8 @@ int main()
 
     while (!WindowShouldClose())
     {
+        float t = Time();
+
         if (IsKeyPressed(KEY_ESCAPE))
             SetWindowShouldClose(true);
 
@@ -91,11 +161,24 @@ int main()
 
         glUseProgram(a2_lines_shader);
         glBindVertexArray(vao_line);
-        glLineWidth(5.0f);
+        glLineWidth(1.0f);
 
         glUniformMatrix4fv(u_mvp, 1, GL_FALSE, MatrixToFloat(mvp));
-        glUniform3f(u_color, 1.0f, 0.0f, 0.0f);
-        glDrawArrays(GL_LINES, 0, line_vertex_count);
+
+        int ee = line_vertex_count / 8;
+
+        for (int i = 0; i < ee; i++)
+        {
+            // Generate different colors for each square
+            float hue = (float)i / ee;  // This spreads the colors evenly
+            glUniform3f(u_color, 
+                0.5f + 0.5f * sinf(hue * 2.0f * PI), 
+                0.5f + 0.5f * sinf((hue + 0.333f) * 2.0f * PI),
+                0.5f + 0.5f * sinf((hue + 0.667f) * 2.0f * PI));
+            glDrawArrays(GL_LINES, i * 8, 8);  // Draw only 8 vertices (one square) at a time
+        }
+        //glUniform3f(u_color, 1.0f, 0.0f, 0.0f);
+        //glDrawArrays(GL_LINES, 0, line_vertex_count);
 
         BeginGui();
         //ImGui::ShowDemoWindow(nullptr);
